@@ -9,17 +9,42 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
+    var reachability: Reachability? = Reachability.networkReachabilityForInternetConnection()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(reachabilityDidChange(_:)), name: NSNotification.Name(rawValue: ReachabilityDidChangeNotificationName), object: nil)
+        
+        _ = reachability?.startNotifier()
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        reachability?.stopNotifier()
     }
-
-
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        checkReachability()
+    }
+    
+    func checkReachability() {
+        guard let r = reachability else {
+            return
+        }
+        if r.isReachable  {
+            view.backgroundColor = UIColor.green
+        } else {
+            view.backgroundColor = UIColor.red
+        }
+    }
+    
+    @objc func reachabilityDidChange(_ notification: Notification) {
+        checkReachability()
+    }
+    
+    
 }
 
